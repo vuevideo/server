@@ -1,0 +1,38 @@
+name: Push docker images to Docker Hub after Pull Request Merge.
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+
+jobs:
+  build_and_push:
+    if: github.event.pull_request.merged == true
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - id: image_name
+        name: Form proper Docker Image Name
+        run: |
+          OLD_DOCKER_TAG=$(echo ${{ github.head_ref }}-${{ github.event.pull_request.head.sha }} | sed 's#/#-#g')
+          NEW_DOCKER_TAG="stage-${{ github.sha }}"
+
+          OLD_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/server:$OLD_DOCKER_TAG"
+          NEW_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/server:$NEW_DOCKER_TAG"
+
+          echo "OLD_DOCKER_IMAGE=$OLD_DOCKER_IMAGE" >> $GITHUB_OUTPUT
+          echo "NEW_DOCKER_IMAGE=$NEW_DOCKER_IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Logging into Docker Registry
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Tagging and Pushing into Docker Registry
+        run: |
+          docker pull ${{ steps.image_name.outputs.OLD_DOCKER_IMAGE }}
+          docker tag ${{ steps.image_name.outputs.OLD_DOCKER_IMAGE }} ${{ steps.image_name.outputs.NEW_DOCKER_IMAGE }}
+          docker push ${{ steps.image_name.outputs.NEW_DOCKER_IMAGE }}
