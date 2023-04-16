@@ -3,11 +3,11 @@ FROM node:19.8.1-alpine as NODE_BUILD
 
 WORKDIR /usr/app/server
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY . ./
 
 RUN npm run build
 
