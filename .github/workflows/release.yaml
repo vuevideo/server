@@ -15,8 +15,8 @@ jobs:
       - id: image_name
         name: Form proper Docker Image Name
         run: |
-          OLD_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/client:stage-${{ github.sha }}"
-          NEW_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/client:latest"
+          OLD_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/server:stage-${{ github.sha }}"
+          NEW_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/server:latest"
 
           echo "OLD_DOCKER_IMAGE=$OLD_DOCKER_IMAGE" >> $GITHUB_OUTPUT
           echo "NEW_DOCKER_IMAGE=$NEW_DOCKER_IMAGE" >> $GITHUB_OUTPUT
