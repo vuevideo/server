@@ -15,6 +15,20 @@ model Credentials {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt() @map("updated_at")
 
+  account   Accounts @relation(fields: [accountId], references: [id])
+  accountId String   @unique @map("account_id")
+
   @@unique([id, firebaseId, emailAddress])
   @@map("credentials")
+}
+
+model Accounts {
+  id       String @id() @default(uuid())
+  name     String @map("name")
+  username String @unique() @map("username")
+
+  Credentials Credentials?
+
+  @@unique([id, username])
+  @@map("accounts")
 }
