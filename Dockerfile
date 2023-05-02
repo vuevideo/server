@@ -23,6 +23,7 @@ COPY --from=NODE_BUILD /usr/app/server/package.json ./package.json
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV DATABASE_URL="postgresql://vuevideo_admin:password@localhost:8888/vuevideo"
 
 EXPOSE ${PORT}
 
