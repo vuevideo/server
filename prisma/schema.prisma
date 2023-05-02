@@ -1,8 +1,34 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Credentials {
+  id           String   @id() @default(uuid())
+  firebaseId   String   @unique() @map("firebase_id")
+  emailAddress String   @unique @map("email_address")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt() @map("updated_at")
+
+  account   Accounts @relation(fields: [accountId], references: [id])
+  accountId String   @unique @map("account_id")
+
+  @@unique([id, firebaseId, emailAddress])
+  @@map("credentials")
+}
+
+model Accounts {
+  id       String @id() @default(uuid())
+  name     String @map("name")
+  username String @unique() @map("username")
+
+  Credentials Credentials?
+
+  @@unique([id, username])
+  @@map("accounts")
 }
