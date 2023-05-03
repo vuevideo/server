@@ -3,7 +3,7 @@ import { PrismaService } from './../prisma/prisma.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended';
-import { Accounts, Credentials, Prisma } from '@prisma/client';
+import { Credentials, Prisma } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
 
 const tCredentials: Credentials = {
