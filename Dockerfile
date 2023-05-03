@@ -9,10 +9,9 @@ RUN npm install
 
 COPY . ./
 
-RUN npm run build
+RUN npm test && npm run build
 
 # Run Step
-
 FROM node:19.8.1-alpine as PROD
 
 WORKDIR /usr/app/server
