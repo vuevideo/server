@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
@@ -9,6 +9,7 @@ async function bootstrap() {
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
 
+  app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
