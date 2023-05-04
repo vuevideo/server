@@ -1,3 +1,4 @@
+import { CreateAccountDto } from './dtos/create-account.dto';
 import { FirebaseService } from './../firebase/firebase.service';
 import { FirebaseModule } from './../firebase/firebase.module';
 import { PrismaService } from './../prisma/prisma.service';

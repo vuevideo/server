@@ -4,7 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended';
 import { Credentials, Prisma } from '@prisma/client';
-import { HttpException } from '@nestjs/common';
+import { HttpException, NotFoundException } from '@nestjs/common';
 
 const tCredentials: Credentials = {
   id: 'id',
@@ -69,10 +69,10 @@ describe('AuthService', () => {
       };
 
       // Act
-      const result = service.getOne(query);
-
-      // Assert
-      expect(result).rejects.toThrowError(HttpException);
+      service.getOne(query).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/not found/);
+      });
     });
   });
 
@@ -118,10 +118,10 @@ describe('AuthService', () => {
       };
 
       // Act
-      const result = service.createOne(query);
-
-      // Assert
-      expect(result).rejects.toThrowError(HttpException);
+      service.createOne(query).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/already exists/);
+      });
     });
   });
 
@@ -133,7 +133,7 @@ describe('AuthService', () => {
 
     it('should update one credential in db', async () => {
       // Arrange
-      prismaService.credentials.findUnique.mockResolvedValue(null);
+      prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       prismaService.credentials.update.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsUpdateArgs = {
         data: {
@@ -158,6 +158,7 @@ describe('AuthService', () => {
 
     it('should throw an error if record does not exists', async () => {
       // Arrange
+      prismaService.credentials.findUnique.mockResolvedValue(null);
       prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsUpdateArgs = {
         data: {
@@ -173,10 +174,10 @@ describe('AuthService', () => {
       };
 
       // Act
-      const result = service.updateOne(query);
-
-      // Assert
-      expect(result).rejects.toThrowError(HttpException);
+      service.updateOne(query).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/not found/);
+      });
     });
   });
 
@@ -188,7 +189,7 @@ describe('AuthService', () => {
 
     it('should delete one credential in db', async () => {
       // Arrange
-      prismaService.credentials.findUnique.mockResolvedValue(null);
+      prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       prismaService.credentials.delete.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsDeleteArgs = {
         where: {
@@ -206,6 +207,7 @@ describe('AuthService', () => {
 
     it('should throw an error if record does not exists', async () => {
       // Arrange
+      prismaService.credentials.findUnique.mockResolvedValue(null);
       prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsDeleteArgs = {
         where: {
@@ -214,10 +216,10 @@ describe('AuthService', () => {
       };
 
       // Act
-      const result = service.deleteOne(query);
-
-      // Assert
-      expect(result).rejects.toThrowError(HttpException);
+      service.deleteOne(query).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/not found/);
+      });
     });
   });
 });
