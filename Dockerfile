@@ -4,8 +4,10 @@ FROM node:19.8.1-alpine as NODE_BUILD
 WORKDIR /usr/app/server
 
 COPY package*.json ./
+COPY prisma ./prisma/
 
 RUN npm install
+RUN npx prisma generate
 
 COPY . ./
 
