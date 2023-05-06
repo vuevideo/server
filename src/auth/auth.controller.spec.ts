@@ -7,7 +7,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended';
-import { Credentials } from '@prisma/client';
+import { Accounts, Credentials } from '@prisma/client';
 
 const createUser = jest.fn();
 
@@ -18,6 +18,12 @@ const tCredentials: Credentials = {
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
+};
+
+const tAccount: Accounts = {
+  id: tCredentials.accountId,
+  name: 'name',
+  username: 'username',
 };
 
 const tCredentialsWithAccount: Credentials = {
@@ -74,8 +80,11 @@ describe('AuthController', () => {
     it('should register a new account', async () => {
       // Arrange
       prismaService.credentials.findUnique.mockResolvedValue(null);
+      prismaService.accounts.findUnique.mockResolvedValue(null);
       prismaService.credentials.create.mockResolvedValue(tCredentials);
       createUser.mockResolvedValue({ uid: 'uid' });
+      const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
+      const serviceCreateSpy = jest.spyOn(service, 'createOne');
 
       // Act
       const result = await controller.createAccount(tDto);
@@ -88,26 +97,16 @@ describe('AuthController', () => {
         displayName: tDto.name,
       });
 
-      expect(prismaService.credentials.findUnique).toBeCalledWith({
-        where: {
-          username: tDto.username,
-        },
-      });
+      expect(serviceCheckSpy).toBeCalledWith(tDto.emailAddress, tDto.username);
 
-      expect(prismaService.credentials.findUnique).toBeCalledWith({
-        where: {
-          emailAddress: tDto.emailAddress,
-        },
-      });
-
-      expect(prismaService.credentials.create).toBeCalledWith({
+      expect(serviceCreateSpy).toBeCalledWith({
         data: {
           firebaseId: 'uid',
-          emailAddress: 'emailAddress',
+          emailAddress: tDto.emailAddress,
           account: {
             create: {
-              username: 'username',
-              name: 'name',
+              username: tDto.username,
+              name: tDto.name,
             },
           },
         },
@@ -117,34 +116,35 @@ describe('AuthController', () => {
     it('should throw an error for duplicate email usage', async () => {
       // Arrange
       prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
+      prismaService.accounts.findUnique.mockResolvedValue(null);
+      const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
 
       // Act
-      const result = controller.createAccount(tDto);
+      controller.createAccount(tDto).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/email/);
 
-      // Assert
-      expect(result).rejects.toThrow(/email/);
-
-      expect(prismaService.credentials.findUnique).toBeCalledWith({
-        where: {
-          emailAddress: tDto.emailAddress,
-        },
+        expect(serviceCheckSpy).toBeCalledWith(
+          tDto.emailAddress,
+          tDto.username,
+        );
       });
     });
 
-    it('should throw an error for duplicate username usage', async () => {
+    it('should throw an error for duplicate username', async () => {
       // Arrange
-      prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
-
+      prismaService.credentials.findUnique.mockResolvedValue(null);
+      prismaService.accounts.findUnique.mockResolvedValue(tAccount);
+      const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
       // Act
-      const result = controller.createAccount(tDto);
+      controller.createAccount(tDto).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/username/);
 
-      // Assert
-      expect(result).rejects.toThrow(/username/);
-
-      expect(prismaService.credentials.findUnique).toBeCalledWith({
-        where: {
-          username: tDto.username,
-        },
+        expect(serviceCheckSpy).toBeCalledWith(
+          tDto.emailAddress,
+          tDto.username,
+        );
       });
     });
   });
