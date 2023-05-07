@@ -11,22 +11,30 @@ export class AuthController {
     private readonly firebaseService: FirebaseService,
   ) {}
 
+  /**
+   * Controller Implementation for account registration.
+   * @param createAccountDto DTO Implementation for account registration.
+   * @returns Newly Created Credentials.
+   */
   @Version('1')
   @Post()
   public async createAccount(
     @Body() createAccountDto: CreateAccountDto,
   ): Promise<Credentials> {
+    // Check for existence of the account with the given username and email.
     await this.authService.checkAccountExistence(
       createAccountDto.emailAddress,
       createAccountDto.username,
     );
 
+    // Create a new firebase account with the provided credentials.
     const firebaseAccount = await this.firebaseService.auth.createUser({
       email: createAccountDto.emailAddress,
       password: createAccountDto.password,
       displayName: createAccountDto.name,
     });
 
+    // Create a new record in thje database and return it to the user.
     return await this.authService.createOne({
       data: {
         firebaseId: firebaseAccount.uid,
