@@ -49,7 +49,7 @@ jobs:
         name: Form proper Docker Image Name
         run: |
           OLD_DOCKER_TAG=$(echo ${{ github.head_ref }}-${{ github.event.pull_request.head.sha }} | sed 's#/#-#g')
-          NEW_DOCKER_TAG="stage-${{ github.sha }}"
+          NEW_DOCKER_TAG="latest"
 
           OLD_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/e2e-server:$OLD_DOCKER_TAG"
           NEW_DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/e2e-server:$NEW_DOCKER_TAG"
