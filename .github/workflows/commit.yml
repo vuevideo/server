@@ -29,3 +29,27 @@ jobs:
 
       - name: Push into Docker Registry
         run: docker push ${{ steps.image_name.outputs.DOCKER_IMAGE }}
+
+  build_and_push_e2e_server:
+    environment: dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - id: image_name
+        name: Form proper Docker Image Name
+        run: |
+          DOCKER_TAG=$(echo ${{ github.ref_name }}-${{ github.sha }} | sed 's#/#-#g')
+          DOCKER_IMAGE="${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/e2e-server:$DOCKER_TAG"
+
+          echo "DOCKER_IMAGE=$DOCKER_IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        run: docker build -f test.Dockerfile -t ${{ steps.image_name.outputs.DOCKER_IMAGE }} .
+
+      - name: Logging into Docker Registry
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Push into Docker Registry
+        run: docker push ${{ steps.image_name.outputs.DOCKER_IMAGE }}
