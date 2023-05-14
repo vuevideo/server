@@ -22,6 +22,7 @@ WORKDIR /usr/app/server
 COPY --from=NODE_BUILD /usr/app/server/dist ./dist
 COPY --from=NODE_BUILD /usr/app/server/node_modules ./node_modules
 COPY --from=NODE_BUILD /usr/app/server/package.json ./package.json
+COPY --from=NODE_BUILD /usr/app/server/prisma ./prisma
 
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -30,4 +31,4 @@ ENV GOOGLE_APPLICATION_CREDENTIALS="/secrets/service-account.json"
 
 EXPOSE ${PORT}
 
-CMD [ "node", "./dist/src/main.js" ]
+CMD [ "npm", "run", "start:migrate:prod" ]
