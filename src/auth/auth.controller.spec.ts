@@ -151,7 +151,7 @@ describe('AuthController', () => {
       // Arrange
       prismaService.credentials.findUnique.mockResolvedValue(null);
       prismaService.accounts.findUnique.mockResolvedValue(null);
-      getUserByEmail.mockRejectedValue(new TNotFoundFirebaseError());
+      getUserByEmail.mockResolvedValue({ uid: 'uid' });
       createUser.mockRejectedValue(new TAlreadyExistsFirebaseError());
       const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
 
