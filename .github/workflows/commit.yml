@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/*/*
+      - hotfix/*/*
 
 jobs:
   build_and_push:
@@ -46,7 +47,7 @@ jobs:
           echo "DOCKER_IMAGE=$DOCKER_IMAGE" >> $GITHUB_OUTPUT
 
       - name: Build Docker image
-        run: docker build -f test.Dockerfile -t ${{ steps.image_name.outputs.DOCKER_IMAGE }} .
+        run: docker build -t ${{ steps.image_name.outputs.DOCKER_IMAGE }} .
 
       - name: Logging into Docker Registry
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
