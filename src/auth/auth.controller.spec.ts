@@ -1,3 +1,4 @@
+import { FirebaseError } from 'firebase-admin';
 import { CreateAccountDto } from './dtos/create-account.dto';
 import { FirebaseService } from './../firebase/firebase.service';
 import { FirebaseModule } from './../firebase/firebase.module';
@@ -7,32 +8,43 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended';
-import { Accounts, Credentials } from '@prisma/client';
+import { Accounts } from '@prisma/client';
 
 const createUser = jest.fn();
+const getUserByEmail = jest.fn();
 
-const tCredentials: Credentials = {
-  id: 'id',
-  firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  accountId: 'accountId',
-};
+class TNotFoundFirebaseError implements FirebaseError {
+  code = 'auth/user-not-found';
+  message = 'auth/user-not-found';
+  stack?: string | undefined;
+  toJSON(): object {
+    return {};
+  }
+}
+
+class TAlreadyExistsFirebaseError implements FirebaseError {
+  code = 'auth/email-already-exists';
+  message = 'auth/email-already-exists';
+  stack?: string | undefined;
+  toJSON(): object {
+    return {};
+  }
+}
 
 const tAccount: Accounts = {
-  id: tCredentials.accountId,
+  id: 'accountId',
   name: 'name',
   username: 'username',
 };
 
-const tCredentialsWithAccount: Credentials = {
+const tCredentials: any = {
   id: 'id',
   firebaseId: 'firebaseId',
   emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
+  account: tAccount,
 };
 
 const tDto: CreateAccountDto = {
@@ -59,6 +71,7 @@ describe('AuthController', () => {
       .useValue({
         auth: {
           createUser,
+          getUserByEmail,
         },
       })
       .compile();
@@ -110,13 +123,36 @@ describe('AuthController', () => {
             },
           },
         },
+        include: {
+          account: true,
+        },
       });
     });
 
-    it('should throw an error for duplicate email usage', async () => {
+    it('should throw an error for duplicate email usage on database end', async () => {
       // Arrange
       prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       prismaService.accounts.findUnique.mockResolvedValue(null);
+      const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
+
+      // Act
+      controller.createAccount(tDto).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/email/);
+
+        expect(serviceCheckSpy).toBeCalledWith(
+          tDto.emailAddress,
+          tDto.username,
+        );
+      });
+    });
+
+    it('should throw an error for duplicate email usage on firebase end', async () => {
+      // Arrange
+      prismaService.credentials.findUnique.mockResolvedValue(null);
+      prismaService.accounts.findUnique.mockResolvedValue(null);
+      getUserByEmail.mockResolvedValue({ uid: 'uid' });
+      createUser.mockRejectedValue(new TAlreadyExistsFirebaseError());
       const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
 
       // Act

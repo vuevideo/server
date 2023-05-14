@@ -1,7 +1,13 @@
 import { FirebaseService } from './../firebase/firebase.service';
 import { Credentials } from '@prisma/client';
 import { CreateAccountDto } from './dtos/create-account.dto';
-import { Body, Controller, Post, Version } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  Version,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -27,6 +33,24 @@ export class AuthController {
       createAccountDto.username,
     );
 
+    // Checking if user account exists on firebase.
+    let firebaseCheck = false;
+    try {
+      const user = await this.firebaseService.auth.getUserByEmail(
+        createAccountDto.emailAddress,
+      );
+
+      if (user) {
+        firebaseCheck = true;
+      }
+    } catch (error) {
+      firebaseCheck = false;
+    }
+
+    // Throw error if an account already exists in firebase.
+    if (firebaseCheck)
+      throw new BadRequestException('This email address is already taken.');
+
     // Create a new firebase account with the provided credentials.
     const firebaseAccount = await this.firebaseService.auth.createUser({
       email: createAccountDto.emailAddress,
@@ -45,6 +69,9 @@ export class AuthController {
             name: createAccountDto.name,
           },
         },
+      },
+      include: {
+        account: true,
       },
     });
   }
