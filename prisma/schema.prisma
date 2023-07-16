@@ -8,6 +8,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Master Table
+model Accounts {
+  id       String @id() @default(uuid())
+  name     String @map("name")
+  username String @unique() @map("username")
+
+  Credentials Credentials?
+
+  image ProfileImage?
+
+  @@unique([id, username])
+  @@map("accounts")
+}
+
 model Credentials {
   id           String   @id() @default(uuid())
   firebaseId   String   @unique() @map("firebase_id")
@@ -22,13 +36,14 @@ model Credentials {
   @@map("credentials")
 }
 
-model Accounts {
-  id       String @id() @default(uuid())
-  name     String @map("name")
-  username String @unique() @map("username")
+model ProfileImage {
+  id          String @id @default(uuid())
+  imageLink   String @map("image_link")
+  storageUuid String @map("storage_uuid")
 
-  Credentials Credentials?
+  account   Accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String   @unique @map("account_id")
 
-  @@unique([id, username])
-  @@map("accounts")
+  @@unique([imageLink, storageUuid])
+  @@map("profile_images")
 }
