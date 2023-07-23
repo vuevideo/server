@@ -75,7 +75,7 @@ export class UserService {
     // Check for profile image in the database.
     const credentialsCheck = await this.prismaService.profileImage.findUnique({
       where: {
-        accountId: args.data.accountId,
+        accountId: args.data.account?.connect?.id,
       },
     });
 
@@ -148,7 +148,7 @@ export class UserService {
     // Check for profile image in the database.
     const profileImageCheck = await this.prismaService.profileImage.findUnique({
       where: {
-        accountId: args.where.id,
+        accountId: args.where.accountId,
       },
     });
 
