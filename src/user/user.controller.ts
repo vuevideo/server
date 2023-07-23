@@ -169,6 +169,11 @@ export class UserController {
     }
   }
 
+  /**
+   * Controller Implementation for deleting account.
+   * @param credentials Logged iun user credentials.
+   * @returns Deleted Account.
+   */
   @Version('v1')
   @Delete()
   public async deleteAccount(@User() credentials: Credentials) {
@@ -182,6 +187,7 @@ export class UserController {
       },
     });
 
+    // Delete the account and return it.
     return await this.userService.deleteAccount({
       where: {
         id: credentialsAccount.account.id,
