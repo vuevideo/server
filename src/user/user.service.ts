@@ -160,4 +160,27 @@ export class UserService {
     // Update and return the updated profile image.
     return await this.prismaService.profileImage.update(args);
   }
+
+  /**
+   * Query the database to delete one accounts object.
+   * @param args Prisma Delete Args
+   * @returns Account
+   * @throws NotFoundException
+   */
+  public async deleteAccount(args: Prisma.AccountsDeleteArgs) {
+    // Check for accounts in the database.
+    const accountsCheck = await this.prismaService.accounts.findUnique({
+      where: {
+        id: args.where.id,
+      },
+    });
+
+    // Check if the accounts is not null.
+    if (!accountsCheck) {
+      throw new NotFoundException('Account not found');
+    }
+
+    // Delete the account.
+    return await this.prismaService.accounts.delete(args);
+  }
 }
