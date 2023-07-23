@@ -354,4 +354,46 @@ describe('UserService', () => {
       });
     });
   });
+
+  // ----------------------------DELETEACCOUNT()----------------------------
+
+  describe('deleteAccount()', () => {
+    beforeEach(() => {
+      mockReset(prisma);
+    });
+
+    it('should delete one accounts in db', async () => {
+      // Arrange
+      prisma.accounts.findUnique.mockResolvedValue(tAccount);
+      prisma.accounts.delete.mockResolvedValue(tAccount);
+      const query: Prisma.AccountsDeleteArgs = {
+        where: {
+          id: tAccount.id,
+        },
+      };
+
+      // Act
+      const result = await service.deleteAccount(query);
+
+      // Assert
+      expect(result).toBe(tAccount);
+      expect(prisma.accounts.delete).toBeCalledWith(query);
+    });
+
+    it('should throw an error if record does not exists', async () => {
+      // Arrange
+      prisma.credentials.findUnique.mockResolvedValue(null);
+      const query: Prisma.AccountsDeleteArgs = {
+        where: {
+          id: tAccount.id,
+        },
+      };
+
+      // Act
+      service.deleteAccount(query).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/not found/);
+      });
+    });
+  });
 });
