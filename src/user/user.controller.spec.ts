@@ -333,4 +333,90 @@ describe('UserController', () => {
       expect(authSpy).toBeCalledTimes(0);
     });
   });
+
+  // ----------------------------DELETEACCOUNT()----------------------------
+
+  describe('deleteAccount()', () => {
+    beforeEach(() => {
+      mockReset(prisma);
+    });
+
+    it('deletes the user', async () => {
+      // Arrange
+      const authServiceSpy = jest.spyOn(authService, 'getOne');
+      const deleteSpy = jest.spyOn(service, 'deleteAccount');
+      prisma.credentials.findUnique.mockResolvedValue(tCredentials);
+      prisma.accounts.findUnique.mockResolvedValue(tAccount);
+      prisma.accounts.delete.mockResolvedValue(tUpdatedAccount);
+
+      // Act
+      const result = await controller.deleteAccount(tCredentials);
+
+      // Assert
+      expect(result).toBe(tUpdatedAccount);
+      expect(deleteSpy).toBeCalledWith({
+        where: {
+          id: tCredentials.accountId,
+        },
+      });
+      expect(authServiceSpy).toBeCalledWith({
+        where: {
+          id: tCredentials.id,
+        },
+        include: {
+          account: true,
+        },
+      });
+    });
+
+    it('throws an error for non existing account', async () => {
+      // Arrange
+      const authServiceSpy = jest.spyOn(authService, 'getOne');
+      const deleteSpy = jest.spyOn(service, 'deleteAccount');
+      prisma.credentials.findUnique.mockResolvedValue(tCredentials);
+      prisma.accounts.findUnique.mockResolvedValue(null);
+
+      // Act
+      await controller.deleteAccount(tCredentials).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/not found/);
+        expect(deleteSpy).toBeCalledWith({
+          where: {
+            id: tCredentials.accountId,
+          },
+        });
+        expect(authServiceSpy).toBeCalledWith({
+          where: {
+            id: tCredentials.id,
+          },
+          include: {
+            account: true,
+          },
+        });
+      });
+    });
+
+    it('throws an error for non existing credentials', async () => {
+      // Arrange
+      const authServiceSpy = jest.spyOn(authService, 'getOne');
+      const deleteSpy = jest.spyOn(service, 'deleteAccount');
+      prisma.credentials.findUnique.mockResolvedValue(null);
+      prisma.accounts.findUnique.mockResolvedValue(null);
+
+      // Act
+      await controller.deleteAccount(tCredentials).catch((error) => {
+        // Assert
+        expect(error.toString()).toMatch(/not found/);
+        expect(deleteSpy).toBeCalledTimes(0);
+        expect(authServiceSpy).toBeCalledWith({
+          where: {
+            id: tCredentials.id,
+          },
+          include: {
+            account: true,
+          },
+        });
+      });
+    });
+  });
 });
