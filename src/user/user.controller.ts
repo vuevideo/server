@@ -1,10 +1,13 @@
+import { AuthGuard } from './../auth/guards/auth.guard';
 import { AuthService } from './../auth/auth.service';
 import {
   Controller,
   Version,
-  Post,
+  Put,
+  Delete,
   Body,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -14,6 +17,7 @@ import { UpdateEmailDto } from './dtos/update-email.dto';
 import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 
 @Controller('user')
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(
     private readonly userService: UserService,
@@ -27,7 +31,7 @@ export class UserController {
    * @returns Updated Account.
    */
   @Version('v1')
-  @Post()
+  @Put()
   public async updateUser(
     @Body() updateUserDto: UpdateUserDto,
     @User() credentials: Credentials,
@@ -83,7 +87,7 @@ export class UserController {
    * @returns Updated Credentials
    */
   @Version('v1')
-  @Post('email')
+  @Put('email')
   public async updateEmailAddress(
     @Body() updateEmailDto: UpdateEmailDto,
     @User() credentials: Credentials,
@@ -120,7 +124,7 @@ export class UserController {
    * @returns ProfileImage Object
    */
   @Version('v1')
-  @Post('profile-image')
+  @Put('profile-image')
   public async updateProfileImage(
     @Body() updateProfileImageDto: UpdateProfileImageDto,
     @User() credentials: Credentials,
@@ -163,5 +167,31 @@ export class UserController {
         },
       });
     }
+  }
+
+  /**
+   * Controller Implementation for deleting account.
+   * @param credentials Logged iun user credentials.
+   * @returns Deleted Account.
+   */
+  @Version('v1')
+  @Delete()
+  public async deleteAccount(@User() credentials: Credentials) {
+    // Fetch existing details
+    const credentialsAccount: any = await this.authService.getOne({
+      where: {
+        id: credentials.id,
+      },
+      include: {
+        account: true,
+      },
+    });
+
+    // Delete the account and return it.
+    return await this.userService.deleteAccount({
+      where: {
+        id: credentialsAccount.account.id,
+      },
+    });
   }
 }
