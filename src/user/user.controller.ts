@@ -1,3 +1,4 @@
+import { AuthGuard } from './../auth/guards/auth.guard';
 import { AuthService } from './../auth/auth.service';
 import {
   Controller,
@@ -6,6 +7,7 @@ import {
   Delete,
   Body,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
@@ -15,6 +17,7 @@ import { UpdateEmailDto } from './dtos/update-email.dto';
 import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 
 @Controller('user')
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(
     private readonly userService: UserService,
