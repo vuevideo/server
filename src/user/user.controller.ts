@@ -30,7 +30,7 @@ export class UserController {
    * @param credentials Logged In User
    * @returns Updated Account.
    */
-  @Version('v1')
+  @Version('1')
   @Put()
   public async updateUser(
     @Body() updateUserDto: UpdateUserDto,
@@ -86,7 +86,7 @@ export class UserController {
    * @param credentials Logged In User Credentials
    * @returns Updated Credentials
    */
-  @Version('v1')
+  @Version('1')
   @Put('email')
   public async updateEmailAddress(
     @Body() updateEmailDto: UpdateEmailDto,
@@ -123,7 +123,7 @@ export class UserController {
    * @param credentials Logged In User Credentials.
    * @returns ProfileImage Object
    */
-  @Version('v1')
+  @Version('1')
   @Put('profile-image')
   public async updateProfileImage(
     @Body() updateProfileImageDto: UpdateProfileImageDto,
@@ -174,7 +174,7 @@ export class UserController {
    * @param credentials Logged iun user credentials.
    * @returns Deleted Account.
    */
-  @Version('v1')
+  @Version('1')
   @Delete()
   public async deleteAccount(@User() credentials: Credentials) {
     // Fetch existing details
