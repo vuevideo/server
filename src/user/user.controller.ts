@@ -2,7 +2,8 @@ import { AuthService } from './../auth/auth.service';
 import {
   Controller,
   Version,
-  Post,
+  Put,
+  Delete,
   Body,
   BadRequestException,
 } from '@nestjs/common';
@@ -27,7 +28,7 @@ export class UserController {
    * @returns Updated Account.
    */
   @Version('v1')
-  @Post()
+  @Put()
   public async updateUser(
     @Body() updateUserDto: UpdateUserDto,
     @User() credentials: Credentials,
@@ -83,7 +84,7 @@ export class UserController {
    * @returns Updated Credentials
    */
   @Version('v1')
-  @Post('email')
+  @Put('email')
   public async updateEmailAddress(
     @Body() updateEmailDto: UpdateEmailDto,
     @User() credentials: Credentials,
@@ -120,7 +121,7 @@ export class UserController {
    * @returns ProfileImage Object
    */
   @Version('v1')
-  @Post('profile-image')
+  @Put('profile-image')
   public async updateProfileImage(
     @Body() updateProfileImageDto: UpdateProfileImageDto,
     @User() credentials: Credentials,
@@ -163,5 +164,25 @@ export class UserController {
         },
       });
     }
+  }
+
+  @Version('v1')
+  @Delete()
+  public async deleteAccount(@User() credentials: Credentials) {
+    // Fetch existing details
+    const credentialsAccount: any = await this.authService.getOne({
+      where: {
+        id: credentials.id,
+      },
+      include: {
+        account: true,
+      },
+    });
+
+    return await this.userService.deleteAccount({
+      where: {
+        id: credentialsAccount.account.id,
+      },
+    });
   }
 }
