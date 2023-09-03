@@ -3,6 +3,7 @@ import { AuthService } from './../auth/auth.service';
 import {
   Controller,
   Version,
+  Get,
   Put,
   Delete,
   Body,
@@ -25,7 +26,31 @@ export class UserController {
   ) {}
 
   /**
-   * Service Implementation for updating account.
+   * Controller Implementation for getting full user account.
+   * @param credentials Logged In User
+   * @returns Full User Account
+   */
+  @Version('1')
+  @Get()
+  public async getUser(@User() credentials: Credentials): Promise<Credentials> {
+    // Fetching user details for the database
+    // and returning it.
+    return await this.authService.getOne({
+      where: {
+        id: credentials.id,
+      },
+      include: {
+        account: {
+          include: {
+            image: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Controller Implementation for updating account.
    * @param updateUserDto DTO Implementation for updating account.
    * @param credentials Logged In User
    * @returns Updated Account.
@@ -81,7 +106,7 @@ export class UserController {
   }
 
   /**
-   * Service Implementation for Email Update.
+   * Controller Implementation for Email Update.
    * @param updateEmailDto DTO implementation for Email Address
    * @param credentials Logged In User Credentials
    * @returns Updated Credentials
