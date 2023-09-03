@@ -50,6 +50,30 @@ const tCredentials: any = {
   account: tAccount,
 };
 
+const tProfileImage: ProfileImage = {
+  accountId: tAccount.id,
+  id: 'id',
+  imageLink: 'imageLink',
+  storageUuid: 'storageUuid',
+};
+
+const tAccountComplete: any = {
+  id: 'accountId',
+  name: 'name',
+  username: 'username',
+  image: tProfileImage,
+};
+
+const tCredentialsComplete: any = {
+  id: 'id',
+  firebaseId: 'firebaseId',
+  emailAddress: 'emailAddress',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  accountId: 'accountId',
+  account: tAccountComplete,
+};
+
 const tCredentialsInvalid: any = {
   id: 'invalidid',
   firebaseId: 'invalidfirebaseId',
@@ -60,12 +84,6 @@ const tCredentialsInvalid: any = {
   account: null,
 };
 
-const tProfileImage: ProfileImage = {
-  accountId: tAccount.id,
-  id: 'id',
-  imageLink: 'imageLink',
-  storageUuid: 'storageUuid',
-};
 describe('UserController', () => {
   let controller: UserController;
   let service: UserService;
@@ -100,6 +118,38 @@ describe('UserController', () => {
     expect(service).toBeDefined();
     expect(authService).toBeDefined();
     expect(prisma).toBeDefined();
+  });
+
+  // ----------------------------GETUSER()----------------------------
+
+  describe('getUser()', () => {
+    beforeEach(() => {
+      mockReset(prisma);
+    });
+
+    it('fetches the user', async () => {
+      // Arrange
+      prisma.credentials.findUnique.mockResolvedValue(tCredentialsComplete);
+      const authServiceSpy = jest.spyOn(authService, 'getOne');
+
+      // Act
+      const result = await controller.getUser(tCredentials);
+
+      // Assert
+      expect(result).toBe(tCredentialsComplete);
+      expect(authServiceSpy).toBeCalledWith({
+        where: {
+          id: tCredentials.id,
+        },
+        include: {
+          account: {
+            include: {
+              image: true,
+            },
+          },
+        },
+      });
+    });
   });
 
   // ----------------------------UPDATEUSER()----------------------------
