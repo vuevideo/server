@@ -50,6 +50,16 @@ const tCredentials: any = {
   account: tAccount,
 };
 
+const tOtherCredentials: any = {
+  id: 'someid',
+  firebaseId: 'firebaseId',
+  emailAddress: 'emailAddress',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  accountId: 'accountId',
+  account: tAccount,
+};
+
 const tProfileImage: ProfileImage = {
   accountId: tAccount.id,
   id: 'id',
@@ -305,7 +315,8 @@ describe('UserController', () => {
   it('throws an error for duplicate email address', async () => {
     // Arrange
     const emailSpy = jest.spyOn(service, 'fineOneByEmailAddress');
-    prisma.credentials.findUnique.mockResolvedValue(tCredentials);
+    prisma.credentials.findUnique.mockResolvedValue(tOtherCredentials);
+    prisma.credentials.findFirst.mockResolvedValue(tCredentials);
 
     const dto: UpdateEmailDto = {
       emailAddress: tCredentials.emailAddress,
