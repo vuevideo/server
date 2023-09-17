@@ -125,7 +125,7 @@ export class UserController {
     });
 
     // Throw an HTTP Exception if the email address already used.
-    if (emailCheck) {
+    if (emailCheck && emailCheck.accountId != credentials.accountId) {
       throw new BadRequestException(
         'User with that email address already exists',
       );
