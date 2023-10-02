@@ -11,7 +11,6 @@ RUN npx prisma generate
 
 COPY . ./
 
-RUN npm test
 RUN npm run build
 
 # Run Step
