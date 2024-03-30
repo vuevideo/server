@@ -10,7 +10,6 @@ import { UserService } from './user.service';
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 import { FirebaseModule } from '../firebase/firebase.module';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { UpdateEmailDto } from './dtos/update-email.dto';
 import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 
 const createUser = jest.fn();
@@ -43,7 +42,6 @@ const tAnotherAccount: Accounts = {
 const tCredentials: any = {
   id: 'id',
   firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
@@ -53,7 +51,6 @@ const tCredentials: any = {
 const tOtherCredentials: any = {
   id: 'someid',
   firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
@@ -77,7 +74,6 @@ const tAccountComplete: any = {
 const tCredentialsComplete: any = {
   id: 'id',
   firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
@@ -87,7 +83,6 @@ const tCredentialsComplete: any = {
 const tCredentialsInvalid: any = {
   id: 'invalidid',
   firebaseId: 'invalidfirebaseId',
-  emailAddress: 'invalidemailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'invalidaccountId',
@@ -269,67 +264,6 @@ describe('UserController', () => {
             account: true,
           },
         });
-      });
-    });
-  });
-
-  // ----------------------------UPDATEEMAILADDRESS()----------------------------
-  describe('updateEmailAddress()', () => {
-    beforeEach(() => {
-      mockReset(prisma);
-    });
-
-    it('updates email of the user', async () => {
-      // Arrange
-      const emailSpy = jest.spyOn(service, 'fineOneByEmailAddress');
-      const updateSpy = jest.spyOn(service, 'updateEmailAddress');
-      prisma.credentials.findUnique.mockResolvedValue(null);
-      prisma.credentials.findFirst.mockResolvedValue(tCredentials);
-      prisma.credentials.update.mockResolvedValue(tCredentials);
-
-      const dto: UpdateEmailDto = {
-        emailAddress: tCredentials.emailAddress,
-      };
-
-      // Act
-      const result = await controller.updateEmailAddress(dto, tCredentials);
-
-      // Assert
-      expect(result).toBe(tCredentials);
-      expect(updateSpy).toBeCalledWith({
-        where: {
-          id: tCredentials.id,
-        },
-        data: {
-          ...dto,
-        },
-      });
-      expect(emailSpy).toBeCalledWith({
-        where: {
-          emailAddress: dto.emailAddress,
-        },
-      });
-    });
-  });
-
-  it('throws an error for duplicate email address', async () => {
-    // Arrange
-    const emailSpy = jest.spyOn(service, 'fineOneByEmailAddress');
-    prisma.credentials.findUnique.mockResolvedValue(tOtherCredentials);
-    prisma.credentials.findFirst.mockResolvedValue(tCredentials);
-
-    const dto: UpdateEmailDto = {
-      emailAddress: tCredentials.emailAddress,
-    };
-
-    // Act
-    await controller.updateEmailAddress(dto, tCredentials).catch((error) => {
-      // Assert
-      expect(error.toString()).toMatch(/already exists/);
-      expect(emailSpy).toBeCalledWith({
-        where: {
-          emailAddress: dto.emailAddress,
-        },
       });
     });
   });

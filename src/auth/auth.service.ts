@@ -15,27 +15,13 @@ export class AuthService {
    * @param emailAddress Email Address String
    * @returns Boolean Status
    */
-  public async checkAccountExistence(
-    emailAddress: string,
-    username: string,
-  ): Promise<void> {
-    // Check for credentials in the database for email address.
-    const credentials = await this.prismaService.credentials.findUnique({
-      where: {
-        emailAddress,
-      },
-    });
-
+  public async checkAccountExistence(username: string): Promise<void> {
     // Check for credentials in the database for username.
     const account = await this.prismaService.accounts.findUnique({
       where: {
         username,
       },
     });
-
-    if (credentials) {
-      throw new BadRequestException('This email address is already taken.');
-    }
 
     if (account) {
       throw new BadRequestException('This username is already taken.');
@@ -75,7 +61,7 @@ export class AuthService {
     // Check for credentials in the database.
     const credentialsCheck = await this.prismaService.credentials.findUnique({
       where: {
-        emailAddress: args.data.emailAddress,
+        firebaseId: args.data.firebaseId,
       },
     });
 
@@ -100,7 +86,7 @@ export class AuthService {
     // Check for credentials in the database.
     const credentialsCheck = await this.prismaService.credentials.findUnique({
       where: {
-        emailAddress: args.where.emailAddress,
+        firebaseId: args.where.firebaseId,
       },
     });
 
@@ -123,7 +109,7 @@ export class AuthService {
     // Check for credentials in the database.
     const credentialsCheck = await this.prismaService.credentials.findUnique({
       where: {
-        emailAddress: args.where.emailAddress,
+        firebaseId: args.where.firebaseId,
       },
     });
 

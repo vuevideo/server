@@ -28,10 +28,7 @@ export class AuthController {
     @Body() createAccountDto: CreateAccountDto,
   ): Promise<Credentials> {
     // Check for existence of the account with the given username and email.
-    await this.authService.checkAccountExistence(
-      createAccountDto.emailAddress,
-      createAccountDto.username,
-    );
+    await this.authService.checkAccountExistence(createAccountDto.username);
 
     // Checking if user account exists on firebase.
     let firebaseCheck = false;
@@ -62,7 +59,6 @@ export class AuthController {
     return await this.authService.createOne({
       data: {
         firebaseId: firebaseAccount.uid,
-        emailAddress: createAccountDto.emailAddress,
         account: {
           create: {
             username: createAccountDto.username,
