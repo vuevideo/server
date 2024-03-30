@@ -15,6 +15,7 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { Accounts, Credentials, ProfileImage } from '@prisma/client';
 import { User } from './../decorators/user.decorator';
 import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
+import { FirebaseService } from './../firebase/firebase.service';
 
 @Controller('user')
 @UseGuards(AuthGuard)
@@ -22,6 +23,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
+    private readonly firebaseService: FirebaseService,
   ) {}
 
   /**
@@ -173,6 +175,14 @@ export class UserController {
         account: true,
       },
     });
+
+    const firebaseUser = await this.firebaseService.auth.getUser(
+      credentials.firebaseId,
+    );
+
+    if (firebaseUser) {
+      await this.firebaseService.auth.deleteUser(firebaseUser.uid);
+    }
 
     // Delete the account and return it.
     return await this.userService.deleteAccount({
