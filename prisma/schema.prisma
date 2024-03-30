@@ -23,16 +23,15 @@ model Accounts {
 }
 
 model Credentials {
-  id           String   @id() @default(uuid())
-  firebaseId   String   @unique() @map("firebase_id")
-  emailAddress String   @unique @map("email_address")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt() @map("updated_at")
+  id         String   @id() @default(uuid())
+  firebaseId String   @unique() @map("firebase_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt() @map("updated_at")
 
   account   Accounts @relation(fields: [accountId], references: [id], onDelete: Cascade)
   accountId String   @unique @map("account_id")
 
-  @@unique([id, firebaseId, emailAddress])
+  @@unique([id, firebaseId])
   @@map("credentials")
 }
 
