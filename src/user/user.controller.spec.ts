@@ -14,6 +14,8 @@ import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 
 const createUser = jest.fn();
 const getUserByEmail = jest.fn();
+const getUser = jest.fn();
+const deleteUser = jest.fn();
 
 const tAccount: Accounts = {
   id: 'accountId',
@@ -108,6 +110,8 @@ describe('UserController', () => {
         auth: {
           createUser,
           getUserByEmail,
+          deleteUser,
+          getUser,
         },
       })
       .compile();
