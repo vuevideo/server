@@ -8,7 +8,6 @@ import { Accounts, Credentials, ProfileImage, Prisma } from '@prisma/client';
 const tCredentials: Credentials = {
   id: 'id',
   firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
@@ -17,7 +16,6 @@ const tCredentials: Credentials = {
 const tUpdatedCredentials: Credentials = {
   id: 'id',
   firebaseId: 'firebaseId',
-  emailAddress: 'updatedemailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
@@ -253,53 +251,6 @@ describe('UserService', () => {
 
       // Act
       service.updateUser(query).catch((error) => {
-        // Assert
-        expect(error.toString()).toMatch(/not found/);
-      });
-    });
-  });
-
-  // ----------------------------UPDATEEMAILADDRESS()----------------------------
-  describe('updateEmailAddress()', () => {
-    beforeEach(() => {
-      mockReset(prisma);
-    });
-
-    it('should update email address in db', async () => {
-      // Arrange
-      prisma.credentials.findFirst.mockResolvedValue(tCredentials);
-      prisma.credentials.update.mockResolvedValue(tUpdatedCredentials);
-      const query: Prisma.CredentialsUpdateArgs = {
-        data: {
-          emailAddress: 'updatedemail',
-        },
-        where: {
-          id: tCredentials.id,
-        },
-      };
-
-      // Act
-      const data = await service.updateEmailAddress(query);
-
-      // Assert
-      expect(data).toBe(tUpdatedCredentials);
-      expect(prisma.credentials.update).toBeCalledWith(query);
-    });
-
-    it('should throw an error if record does not exists', async () => {
-      // Arrange
-      prisma.credentials.findFirst.mockResolvedValue(null);
-      const query: Prisma.CredentialsUpdateArgs = {
-        data: {
-          emailAddress: 'updatedemail',
-        },
-        where: {
-          id: tCredentials.id,
-        },
-      };
-
-      // Act
-      service.updateEmailAddress(query).catch((error) => {
         // Assert
         expect(error.toString()).toMatch(/not found/);
       });

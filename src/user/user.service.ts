@@ -1,4 +1,4 @@
-import { Accounts, ProfileImage, Prisma, Credentials } from '@prisma/client';
+import { Accounts, ProfileImage, Prisma } from '@prisma/client';
 import { PrismaService } from './../prisma/prisma.service';
 import {
   BadRequestException,
@@ -21,18 +21,6 @@ export class UserService {
         username,
       },
     });
-  }
-
-  /**
-   * Query the database to fetch one credentials object by email.
-   * @param args Prisma Find Unique Args
-   * @returns Credentials
-   * @throws NotFoundException
-   */
-  public async fineOneByEmailAddress(
-    args: Prisma.CredentialsFindUniqueArgs,
-  ): Promise<Credentials | null> {
-    return await this.prismaService.credentials.findUnique(args);
   }
 
   /**
@@ -109,31 +97,6 @@ export class UserService {
 
     // Update and return the updated account.
     return await this.prismaService.accounts.update(args);
-  }
-
-  /**
-   * Query the database to update email address.
-   * @param args Prisma Update Args
-   * @returns Credentials
-   * @throws NotFoundException
-   */
-  public async updateEmailAddress(
-    args: Prisma.CredentialsUpdateArgs,
-  ): Promise<Credentials> {
-    // Check for credentials in the database.
-    const credentialsCheck = await this.prismaService.credentials.findFirst({
-      where: {
-        id: args.where.id,
-      },
-    });
-
-    // Check if the credentials is not null.
-    if (!credentialsCheck) {
-      throw new NotFoundException('Credentials not found');
-    }
-
-    // Update and return the updated credentials.
-    return await this.prismaService.credentials.update(args);
   }
 
   /**

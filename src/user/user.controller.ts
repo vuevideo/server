@@ -14,7 +14,6 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { Accounts, Credentials, ProfileImage } from '@prisma/client';
 import { User } from './../decorators/user.decorator';
-import { UpdateEmailDto } from './dtos/update-email.dto';
 import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 
 @Controller('user')
@@ -103,43 +102,6 @@ export class UserController {
         },
       });
     }
-  }
-
-  /**
-   * Controller Implementation for Email Update.
-   * @param updateEmailDto DTO implementation for Email Address
-   * @param credentials Logged In User Credentials
-   * @returns Updated Credentials
-   */
-  @Version('1')
-  @Put('email')
-  public async updateEmailAddress(
-    @Body() updateEmailDto: UpdateEmailDto,
-    @User() credentials: Credentials,
-  ): Promise<Credentials> {
-    // Check if any other account has the same email address
-    const emailCheck = await this.userService.fineOneByEmailAddress({
-      where: {
-        emailAddress: updateEmailDto.emailAddress,
-      },
-    });
-
-    // Throw an HTTP Exception if the email address already used.
-    if (emailCheck && emailCheck.accountId != credentials.accountId) {
-      throw new BadRequestException(
-        'User with that email address already exists',
-      );
-    }
-
-    // Update and return the updated credentials.
-    return await this.userService.updateEmailAddress({
-      where: {
-        id: credentials.id,
-      },
-      data: {
-        emailAddress: updateEmailDto.emailAddress,
-      },
-    });
   }
 
   /**
