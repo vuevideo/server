@@ -23,7 +23,6 @@ const tInvalidToken = 'testtoken123';
 const tCredentials: Credentials = {
   id: 'id',
   firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',

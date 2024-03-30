@@ -4,12 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { DeepMockProxy, mockDeep, mockReset } from 'jest-mock-extended';
 import { Accounts, Credentials, Prisma } from '@prisma/client';
-import { HttpException, NotFoundException } from '@nestjs/common';
 
 const tCredentials: Credentials = {
   id: 'id',
   firebaseId: 'firebaseId',
-  emailAddress: 'emailAddress',
   createdAt: new Date(),
   updatedAt: new Date(),
   accountId: 'accountId',
@@ -53,7 +51,7 @@ describe('AuthService', () => {
       prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsFindUniqueArgs = {
         where: {
-          emailAddress: tCredentials.emailAddress,
+          firebaseId: tCredentials.firebaseId,
         },
       };
 
@@ -70,7 +68,7 @@ describe('AuthService', () => {
       prismaService.credentials.findUnique.mockResolvedValue(null);
       const query: Prisma.CredentialsFindUniqueArgs = {
         where: {
-          emailAddress: tCredentials.emailAddress,
+          firebaseId: tCredentials.firebaseId,
         },
       };
 
@@ -95,7 +93,6 @@ describe('AuthService', () => {
       const query: Prisma.CredentialsCreateArgs = {
         data: {
           firebaseId: 'firebaseId',
-          emailAddress: 'emailAddress',
           createdAt: new Date(),
           updatedAt: new Date(),
           accountId: 'accountId',
@@ -116,7 +113,6 @@ describe('AuthService', () => {
       const query: Prisma.CredentialsCreateArgs = {
         data: {
           firebaseId: 'firebaseId',
-          emailAddress: 'emailAddress',
           createdAt: new Date(),
           updatedAt: new Date(),
           accountId: 'accountId',
@@ -144,13 +140,12 @@ describe('AuthService', () => {
       const query: Prisma.CredentialsUpdateArgs = {
         data: {
           firebaseId: 'firebaseId',
-          emailAddress: 'emailAddress',
           createdAt: new Date(),
           updatedAt: new Date(),
           accountId: 'accountId',
         },
         where: {
-          emailAddress: 'emailAddress',
+          firebaseId: 'firebaseId',
         },
       };
 
@@ -169,13 +164,12 @@ describe('AuthService', () => {
       const query: Prisma.CredentialsUpdateArgs = {
         data: {
           firebaseId: 'firebaseId',
-          emailAddress: 'emailAddress',
           createdAt: new Date(),
           updatedAt: new Date(),
           accountId: 'accountId',
         },
         where: {
-          emailAddress: 'emailAddress',
+          firebaseId: 'firebaseId',
         },
       };
 
@@ -199,7 +193,7 @@ describe('AuthService', () => {
       prismaService.credentials.delete.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsDeleteArgs = {
         where: {
-          emailAddress: 'emailAddress',
+          firebaseId: 'firebaseId',
         },
       };
 
@@ -217,7 +211,7 @@ describe('AuthService', () => {
       prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
       const query: Prisma.CredentialsDeleteArgs = {
         where: {
-          emailAddress: 'emailAddress',
+          firebaseId: 'firebaseId',
         },
       };
 
@@ -235,25 +229,6 @@ describe('AuthService', () => {
       mockReset(prismaService);
     });
 
-    it('should throw an error if account exists for a given email address', async () => {
-      // Arrange
-      prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
-
-      // Act
-      service
-        .checkAccountExistence(tCredentials.emailAddress, tAccount.username)
-        // Assert
-        .catch((error) => {
-          expect(error.toString()).toMatch(/email address is already taken/);
-
-          expect(prismaService.credentials.findUnique).toBeCalledWith({
-            where: {
-              emailAddress: tCredentials.emailAddress,
-            },
-          });
-        });
-    });
-
     it('should throw an error if account exists for a given username', async () => {
       // Arrange
       prismaService.credentials.findUnique.mockResolvedValue(null);
@@ -261,7 +236,7 @@ describe('AuthService', () => {
 
       // Act
       service
-        .checkAccountExistence(tCredentials.emailAddress, tAccount.username)
+        .checkAccountExistence(tAccount.username)
         // Assert
         .catch((error) => {
           expect(error.toString()).toMatch(/username is already taken/);
@@ -274,42 +249,15 @@ describe('AuthService', () => {
         });
     });
 
-    it('should pass for a given email address', async () => {
-      // Arrange
-      prismaService.credentials.findUnique.mockResolvedValue(null);
-
-      // Act
-      await service.checkAccountExistence(
-        tCredentials.emailAddress,
-        tAccount.username,
-      );
-
-      // Assert
-      expect(prismaService.credentials.findUnique).toBeCalledWith({
-        where: {
-          emailAddress: tCredentials.emailAddress,
-        },
-      });
-    });
-
     it('should pass for a given username', async () => {
       // Arrange
       prismaService.credentials.findUnique.mockResolvedValue(null);
       prismaService.accounts.findUnique.mockResolvedValue(null);
 
       // Act
-      await service.checkAccountExistence(
-        tCredentials.emailAddress,
-        tAccount.username,
-      );
+      await service.checkAccountExistence(tAccount.username);
 
-      // Act
-      await service.checkAccountExistence(
-        tCredentials.emailAddress,
-        tAccount.username,
-      );
       // Assert
-
       expect(prismaService.accounts.findUnique).toBeCalledWith({
         where: {
           username: tAccount.username,

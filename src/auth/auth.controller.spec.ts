@@ -110,12 +110,11 @@ describe('AuthController', () => {
         displayName: tDto.name,
       });
 
-      expect(serviceCheckSpy).toBeCalledWith(tDto.emailAddress, tDto.username);
+      expect(serviceCheckSpy).toBeCalledWith(tDto.username);
 
       expect(serviceCreateSpy).toBeCalledWith({
         data: {
           firebaseId: 'uid',
-          emailAddress: tDto.emailAddress,
           account: {
             create: {
               username: tDto.username,
@@ -126,24 +125,6 @@ describe('AuthController', () => {
         include: {
           account: true,
         },
-      });
-    });
-
-    it('should throw an error for duplicate email usage on database end', async () => {
-      // Arrange
-      prismaService.credentials.findUnique.mockResolvedValue(tCredentials);
-      prismaService.accounts.findUnique.mockResolvedValue(null);
-      const serviceCheckSpy = jest.spyOn(service, 'checkAccountExistence');
-
-      // Act
-      controller.createAccount(tDto).catch((error) => {
-        // Assert
-        expect(error.toString()).toMatch(/email/);
-
-        expect(serviceCheckSpy).toBeCalledWith(
-          tDto.emailAddress,
-          tDto.username,
-        );
       });
     });
 
@@ -160,10 +141,7 @@ describe('AuthController', () => {
         // Assert
         expect(error.toString()).toMatch(/email/);
 
-        expect(serviceCheckSpy).toBeCalledWith(
-          tDto.emailAddress,
-          tDto.username,
-        );
+        expect(serviceCheckSpy).toBeCalledWith(tDto.username);
       });
     });
 
@@ -177,10 +155,7 @@ describe('AuthController', () => {
         // Assert
         expect(error.toString()).toMatch(/username/);
 
-        expect(serviceCheckSpy).toBeCalledWith(
-          tDto.emailAddress,
-          tDto.username,
-        );
+        expect(serviceCheckSpy).toBeCalledWith(tDto.username);
       });
     });
   });
